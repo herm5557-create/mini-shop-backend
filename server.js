@@ -289,6 +289,7 @@ const adminRoutes = require("./routes/adminRoutes");
 app.use("/api/admin", adminRoutes);
 // start
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`Backend + Socket.IO running on port ${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0';
+server.listen(PORT, HOST, () => {
+  console.log(`Backend + Socket.IO running on ${HOST}:${PORT}`);
 });
