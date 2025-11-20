@@ -1,0 +1,5 @@
+
+> backend@1.0.0 start
+> node server.js
+
+Backend + Socket.IO running on port 5000
