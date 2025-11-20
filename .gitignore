@@ -1,0 +1,13 @@
+# Node
+node_modules/
+package-lock.json
+
+# Uploaded files and local data
+uploads/
+data/
+
+# Env
+.env
+
+# Logs
+*.log
