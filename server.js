@@ -8,6 +8,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Health check endpoint for Render
+app.get("/", (req, res) => {
+  res.json({ status: "ok", message: "Mini Shop Backend API", timestamp: new Date() });
+});
+
 // static uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
