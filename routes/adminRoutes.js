@@ -2,22 +2,20 @@
 const express = require("express");
 const router = express.Router();
 
-// Simple admin login for demo purposes
+// Demo admin token and simple login (replace with real auth in production)
+const ADMIN_TOKEN = "admin-demo-token";
+
 router.post("/login", (req, res) => {
   const { username, password } = req.body || {};
-  // WARNING: hardcoded credentials - replace with real auth in production
   if (username === "admin" && password === "password") {
-    // return a simple token (not a JWT) for frontend demo
-    return res.json({ ok: true, token: "admin-demo-token", username: "admin" });
+    return res.json({ ok: true, token: ADMIN_TOKEN, username: "admin" });
   }
   return res.status(401).json({ ok: false, message: "Invalid credentials" });
 });
 
 // Simple token auth middleware for admin routes
-// const ADMIN_TOKEN already declared above
 function adminAuth(req, res, next) {
   // allow login route through
-  // check Authorization header (Bearer) or x-access-token or token in body
   const authHeader = req.headers.authorization || req.headers["x-access-token"] || req.body.token;
   let token = null;
   if (authHeader && typeof authHeader === "string") {
@@ -36,54 +34,22 @@ router.use(adminAuth);
 router.get("/daily-summary", (req, res) => {
   try {
     const payments = req.app.get("payments") || [];
-    // Group by date (YYYY-MM-DD)
     const summary = {};
     payments.forEach((p) => {
       if (!p.createdAt) return;
       const date = new Date(p.createdAt);
-      const key = date.toISOString().slice(0, 10); // YYYY-MM-DD
+      const key = date.toISOString().slice(0, 10);
       if (!summary[key]) summary[key] = { date: key, totalLAK: 0, totalCoin: 0, count: 0 };
       summary[key].totalLAK += Number(p.amountLAK || 0);
       summary[key].totalCoin += Number(p.coinAmount || p.coin || 0);
       summary[key].count += 1;
     });
-    // Return as array sorted by date desc
     const result = Object.values(summary).sort((a, b) => b.date.localeCompare(a.date));
     res.json(result);
   } catch (err) {
     res.status(500).json({ message: "server error" });
   }
 });
-
-// Simple admin login for demo purposes
-router.post("/login", (req, res) => {
-  const { username, password } = req.body || {};
-  // WARNING: hardcoded credentials - replace with real auth in production
-  if (username === "admin" && password === "password") {
-    // return a simple token (not a JWT) for frontend demo
-    return res.json({ ok: true, token: "admin-demo-token", username: "admin" });
-  }
-  return res.status(401).json({ ok: false, message: "Invalid credentials" });
-});
-
-// Simple token auth middleware for admin routes
-const ADMIN_TOKEN = "admin-demo-token";
-function adminAuth(req, res, next) {
-  // allow login route through
-  // check Authorization header (Bearer) or x-access-token or token in body
-  const authHeader = req.headers.authorization || req.headers["x-access-token"] || req.body.token;
-  let token = null;
-  if (authHeader && typeof authHeader === "string") {
-    if (authHeader.startsWith("Bearer ")) token = authHeader.split(" ")[1];
-    else token = authHeader;
-  }
-
-  if (token === ADMIN_TOKEN) return next();
-  return res.status(401).json({ message: "unauthorized" });
-}
-
-// apply auth to following routes
-router.use(adminAuth);
 
 // Use server's in-memory payments and save helper
 router.get("/payments", (req, res) => {
@@ -114,7 +80,6 @@ router.post("/approve/:id", (req, res) => {
 
     if (typeof save === "function") save();
 
-    // emit updates
     if (io) {
       io.emit("payment_update", p);
       try {
