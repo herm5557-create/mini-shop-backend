@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: mini-shop-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    branch: main
+    envVars:
+      - key: NODE_ENV
+        value: production
+# Notes:
+# - Render will set PORT automatically; the server reads process.env.PORT.
+# - Files are at repo root (no backend/ subdirectory needed).
+# - For persistence of uploads/data, configure a disk or use external storage (S3).
